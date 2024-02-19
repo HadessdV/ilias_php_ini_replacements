@@ -1,6 +1,9 @@
 import argparse
 import os
 
+errors = []
+msgs = []
+
 settings_names = {
     'max_execution_time': '600',
     'max_input_vars': '10000',
@@ -37,6 +40,12 @@ apc_names = [
     'apc.serializer=igbinary\n'
 ]
 
+def add_error(error_msg: str):
+    errors.append(error_msg)
+
+def add_msgs(msg: str):
+    msgs.append(msg)
+
 def add_lines_at_end(php_ini_lines: list) -> list:
     """add lines at the end of the php.ini
 
@@ -48,7 +57,7 @@ def add_lines_at_end(php_ini_lines: list) -> list:
     """
     for line in php_ini_lines:
         if apc_names[0] in line:
-            print('APC Settings already in php.ini')
+            add_error('APC Settings already in php.ini')
             return php_ini_lines
     return php_ini_lines.extend(apc_names)
 
@@ -69,45 +78,42 @@ def replace_php_setting(settings: dict, line: str) -> str :
                 result = key + "=" + settings[key]
                 return result
 
-def execute_changes_in_php_ini(php_arg: int = 0, apc_arg: int = 0) -> bool:
+def execute_changes_in_php_ini(php_ini_path: str, php_arg: int = 0, apc_arg: int = 0, ) -> bool:
     """replace settings in php.ini with key_value_settings in local dictionarys
 
     Returns:
         bool: did the code got through till return true?
     """
     if php_arg == 0 and apc_arg == 0:
-        print('Arguments where both 0, please add arguments like "-php=1" or "-apc=1" to change values in php.ini for these settings\n')
+        add_error('Arguments where both 0, please add arguments like "-php=1" or "-apc=1" to change values in php.ini for these settings\n')
         return False
 
-    php_ini_path = ''
-    php_ini_usual_path = '/etc/php/7.4/apache2/php.ini'
-    if os.path.exists(php_ini_usual_path):
-        print('php.ini datei existiert')
-        php_ini_path = php_ini_usual_path
-
+    if os.path.exists(php_ini_path):
+        add_msgs('php.ini datei existiert')
     else:
-        print('php.ini-Datei existiert nicht, bitte geben Sie den richtigen Pfad ein:')
-        php_ini_path = input()
+        add_error('php.ini not at directory')
+        return False
 
     #check if you got read/write access
     if os.access(php_ini_path, os.R_OK):
-        print('read access is given')
+        add_msgs('read access is given')
     else:
-        print('read access is NOT given')
+        add_error('read access is NOT given')
     if os.access(php_ini_path, os.W_OK):
-        print('write access is given')
+        add_msgs('write access is given')
     else:
-        print('write access is NOT given')        
+        add_error('write access is NOT given') 
+        return False       
 
     with open(php_ini_path, 'r') as file:
         if php_arg == 1:
-            print('I will update the php-settings')
+            add_msgs('I will update the php-settings')
         file_data = file.readlines()
         for counter, line in enumerate(file_data):
             if replace_php_setting(settings_names, line):
                 file_data[counter] = replace_php_setting(settings_names, line)
         if apc_arg == 1:
-            print('I will add apc-settings at the end of the php.ini')        
+            add_msgs('I will add apc-settings at the end of the php.ini')        
             add_lines_at_end(file_data)                
 
     size_file_data = len(file_data)
@@ -126,8 +132,13 @@ if __name__ == "__main__":
     parser.add_argument("-php", type=int, default=1)
     args = parser.parse_args()
     arg_values = vars(args)
-    worked = execute_changes_in_php_ini(arg_values['php'], arg_values['apc'])
+    worked = execute_changes_in_php_ini('/etc/php/7.4/apache2/php.ini', arg_values['php'], arg_values['apc'])
     if worked:
         print('Changes for php.ini completed')
+        print('Meldungen: ')
+        print(msgs)
+        print('Errors: ')
+        print(errors)
     else:
-        print('Changes for php.ini didnt succeed or was not activated')
+        print('Errors which lead to problems:')
+        print(errors)        
