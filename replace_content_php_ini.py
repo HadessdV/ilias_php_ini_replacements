@@ -91,9 +91,9 @@ class PhpIniChange:
             return False
 
         if os.path.exists(php_ini_path):
-            self.__add_msgs('php.ini datei existiert')
+            self.__add_msgs('php.ini exists')
         else:
-            self.__add_error('php.ini not at directory')
+            self.__add_error('php.ini doest exist there or false path')
             return False
 
         #check if you got read/write access
