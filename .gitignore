@@ -1,0 +1,7 @@
+#ignore spec
+*.spec
+#ignore directories
+build/gui/
+build/
+.venv/
+dist/

@@ -30,7 +30,7 @@ label_path.grid(row=grid_row, sticky='W')
 grid_row += 1
 edit_path.grid(row=grid_row, sticky='W')
 grid_row += 1
-check_root = tk.Checkbutton(window, text='Root?', variable=root_bool, state=tk.DISABLED)
+check_root = tk.Checkbutton(window, text='Root', variable=root_bool, state=tk.DISABLED)
 check_root.grid(row=grid_row, sticky='W')
 if is_root:
     check_root.select()
