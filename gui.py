@@ -3,10 +3,11 @@ import replace_content_php_ini as rcpi
 import os
 
 def do_php_ini_change(php_ini_path: str, php_var: int, apc_var: int):
-    rcpi.execute_changes_in_php_ini(php_ini_path, php_var, apc_var)
-    output_msgs = ', \n'.join(rcpi.msgs)
+    php_change = rcpi.PhpIniChange()
+    php_change.execute_changes_in_php_ini(php_ini_path, php_var, apc_var)
+    output_msgs = ', \n'.join(php_change.get_msgs())
     output_msgs += '\n----- Error Messages -----\n'
-    output_msgs += ', \n'.join(rcpi.errors)
+    output_msgs += ', \n'.join(php_change.get_errors())
     txt_area_msgs.insert(tk.INSERT, output_msgs)
 
 
