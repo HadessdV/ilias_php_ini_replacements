@@ -10,11 +10,13 @@ def do_php_ini_change(php_ini_path: str, php_var: int, apc_var: int):
     output_msgs += ', \n'.join(php_change.get_errors())
     txt_area_msgs.insert(tk.INSERT, output_msgs)
 
-
-is_root = bool(os.geteuid() == 0)
+is_root = True
+if(os.name != 'nt'):
+    is_root = bool(os.geteuid() == 0)
 
 window = tk.Tk()
 window.geometry('550x200')
+window.title("Rewrite php.ini")
 
 grid_row = 0
 php_set = tk.IntVar()
